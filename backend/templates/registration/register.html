@@ -1,0 +1,52 @@
+{# backend/templates/registration/register.html #}
+{% extends "base.html" %}
+{% block title %}Kayıt Ol | AirProd{% endblock %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width:400px">
+  <div class="card-body p-4">
+    <h3 class="card-title text-center mb-4">Yeni Hesap Oluştur</h3>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <div>{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+      </div>
+      <div class="mb-3">
+        {{ form.team.label_tag }}
+        {{ form.team }}
+      </div>
+      <div class="mb-3">
+        {{ form.password1.label_tag }}
+        {{ form.password1 }}
+      </div>
+      <div class="mb-3">
+        {{ form.password2.label_tag }}
+        {{ form.password2 }}
+      </div>
+      <button type="submit" class="btn btn-success w-100">Kayıt Ol</button>
+    </form>
+
+    <div class="text-center mt-3">
+      <small>Zaten hesabın var mı? <a href="{% url 'login' %}">Giriş Yap</a></small>
+    </div>
+  </div>
+  <div class="card-footer text-center text-muted">
+    © {{ now.year }} Baykar CASE
+  </div>
+</div>
+{% endblock %}

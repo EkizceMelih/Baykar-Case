@@ -1,0 +1,32 @@
+{# templates/registration/login.html #}
+{% extends "base.html" %}
+{% block title %}Giriş Yap | AirProd{% endblock %}
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width:400px">
+  <div class="card-body p-4">
+    <h3 class="text-center mb-4">Personel Girişi</h3>
+
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% for field in form %}
+          {% for error in field.errors %}<div>{{ error }}</div>{% endfor %}
+        {% endfor %}
+        {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+      </div>
+      <div class="mb-3">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+      </div>
+      <button class="btn btn-primary w-100">Giriş Yap</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
