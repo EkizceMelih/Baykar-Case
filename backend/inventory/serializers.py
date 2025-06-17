@@ -1,5 +1,3 @@
-# backend/inventory/serializers.py
-
 from rest_framework import serializers
 from .models import Part
 
@@ -17,8 +15,10 @@ class PartSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'status', 'created_by', 'created_at')
 
     def create(self, validated_data):
-        # request.user’ı context'ten alıp created_by ve status ekleyelim
         user = self.context['request'].user
+        # Montaj Takımı ise engelle
+        if user.team and user.team.name == "MONTAJ":
+            raise serializers.ValidationError("Montaj Takımı parça üretemez.")
         validated_data['created_by'] = user
         validated_data['status'] = Part.Status.AVAILABLE
         return super().create(validated_data)

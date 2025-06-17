@@ -1,11 +1,18 @@
+# assembly/admin.py
+
 from django.contrib import admin
-from .models import Aircraft, AircraftPart
+from .models import Aircraft
 
 @admin.register(Aircraft)
 class AircraftAdmin(admin.ModelAdmin):
-    list_display = ('id', 'type', 'created_by', 'created_at')
-    list_filter  = ('type', 'created_by')
+    """
+    Aircraft modeli için admin paneli ayarları.
+    """
+    # DEĞİŞTİ: Alan isimleri modeldeki yeni isimlerle güncellendi.
+    list_display = ('serial_number', 'model_name', 'assembled_by', 'assembly_date')
+    list_filter = ('model_name', 'assembled_by', 'assembly_date')
+    search_fields = ('serial_number', 'model_name')
+    readonly_fields = ('assembly_date',) # Otomatik oluşturulan alanlar sadece okunabilir olsun
 
-@admin.register(AircraftPart)
-class AircraftPartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'part', 'aircraft')
+# Eski admin.site.register(Aircraft) satırını bu class yapısı
+# ile değiştirmek daha modern ve esnek bir yöntemdir.

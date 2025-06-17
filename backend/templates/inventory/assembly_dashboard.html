@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load inventory_tags %}
+
+{% block title %}Montaj Gösterge Paneli{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Montaj Gösterge Paneli</h2>
+        <div>
+            <a href="{% url 'create_assembly' %}" class="btn btn-primary">Yeni Montaj Yap</a>
+            <a href="{% url 'list_aircrafts' %}" class="btn btn-secondary">Monte Edilmiş Uçaklar</a>
+        </div>
+    </div>
+    <p class="text-muted">Bu sayfada, montaj işlemi için gerekli olan parçaların envanterdeki genel durumunu görebilirsiniz.</p>
+    <hr>
+
+    <h4>Genel Parça Envanter Durumu (Stoktaki Parçalar)</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Parça Tipi</th>
+                    {% for model_key, model_label in aircraft_models %}
+                        <th scope="col">{{ model_label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for type_key, type_label in part_types %}
+                <tr>
+                    <th scope="row">{{ type_label }}</th>
+                    {% for model_key, model_label in aircraft_models %}
+                        <td>
+                            {% with count=inventory_summary|get_item:model_key|get_item:type_key|default:0 %}
+                                <span class="badge {% if count > 0 %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                                    {{ count }} Adet
+                                </span>
+                            {% endwith %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

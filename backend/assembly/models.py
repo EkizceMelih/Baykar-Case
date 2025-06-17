@@ -1,32 +1,52 @@
 from django.db import models
-from users.models import Team
-from inventory.models import Part
+from django.conf import settings
+from django.utils import timezone # Yıl bilgisini almak için eklendi
 
 class Aircraft(models.Model):
-    class AircraftType(models.TextChoices):
-        TB2       = 'TB2',       'TB2'
-        TB3       = 'TB3',       'TB3'
-        AKINCI    = 'AKINCI',    'Akıncı'
+    """
+    Monte edilmiş hava araçlarını temsil eder.
+    Her yeni uçak, kaydedilirken otomatik bir seri numarası alır.
+    """
+    class AircraftModel(models.TextChoices):
+        TB2 = 'TB2', 'TB2'
+        TB3 = 'TB3', 'TB3'
+        AKINCI = 'AKINCI', 'Akıncı'
         KIZILELMA = 'KIZILELMA', 'Kızilelma'
 
-    type       = models.CharField(max_length=10, choices=AircraftType.choices)
-    created_by = models.ForeignKey(Team, on_delete=models.PROTECT, related_name='aircrafts')
-    created_at = models.DateTimeField(auto_now_add=True)
+    model_name = models.CharField(max_length=10, choices=AircraftModel.choices, verbose_name="Hava Aracı Modeli")
+    
+    # DEĞİŞTİRİLDİ: Bu alanın sistem tarafından doldurulacağını belirtiyoruz.
+    serial_number = models.CharField(
+        max_length=100,
+        unique=True,
+        blank=True,      # Geçici olarak boş olabilir (kaydetme anında dolacak)
+        editable=False,  # Kullanıcı tarafından düzenlenemez
+        verbose_name="Seri Numarası"
+    )
+    
+    assembled_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="assembled_aircrafts")
+    assembly_date = models.DateTimeField(auto_now_add=True, verbose_name="Montaj Tarihi")
 
     def __str__(self):
-        return f"{self.get_type_display()} (ID: {self.id})"
-
-class AircraftPart(models.Model):
-    aircraft = models.ForeignKey(
-        Aircraft,
-        on_delete=models.CASCADE,
-        related_name='parts'
-    )
-    part = models.ForeignKey(Part, on_delete=models.PROTECT)
+        return self.serial_number or f"{self.get_model_name_display()} (Kaydedilmedi)"
+    
+    # YENİ: Otomatik seri numarası oluşturmak için save metodu
+    def save(self, *args, **kwargs):
+        # Sadece yeni bir nesne oluşturulurken (yani pk yoksa) seri numarası ata
+        if not self.pk:
+            year = timezone.now().year
+            prefix = f"{self.model_name}-{year}"
+            
+            # Aynı ön eke sahip son uçağı bulup sıradaki numarayı hesapla
+            last_aircraft_count = Aircraft.objects.filter(serial_number__startswith=prefix).count()
+            next_id = last_aircraft_count + 1
+            
+            # Seri numarasını formatla (örn: TB2-2025-0001)
+            self.serial_number = f"{prefix}-{str(next_id).zfill(4)}"
+        
+        # Orijinal save metodunu çağırarak nesneyi kaydet
+        super().save(*args, **kwargs)
 
     class Meta:
-        # Aynı part nesnesinin bir uçakta sadece bir kez kullanılması yeterli:
-        unique_together = ('aircraft', 'part')
-
-    def __str__(self):
-        return f"{self.part} → {self.aircraft}"
+        verbose_name = "Hava Aracı"
+        verbose_name_plural = "Hava Araçları"

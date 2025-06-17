@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Yeni Uçak Montajı{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Yeni Uçak Montajı</h2>
+    <p>Lütfen monte edilecek uçağın modelini ve kullanılacak parçaları seçin.</p>
+    <hr>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form id="assemblyForm" method="post" action="{% url 'create_assembly' %}">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="model_name" class="form-label"><strong>1. Uçak Modeli Seçin:</strong></label>
+            <select name="model_name" id="model_name" class="form-select" required>
+                <option value="">--- Model Seçin ---</option>
+                {% for model in aircraft_models_with_status %}
+                    <option value="{{ model.key }}" {% if not model.ready %}disabled{% endif %}>
+                        {{ model.label }} {% if not model.ready %}(Eksik Parça: {{ model.missing }}){% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <hr>
+        <h5>2. Gerekli Parçaları Seçin:</h5>
+
+        <!-- DEĞİŞTİRİLDİ: Döngü artık view'da hazırlanan 'part_groups' listesini kullanıyor. -->
+        {% for group in part_groups %}
+        <div class="mb-3">
+            <label for="{{ group.key }}" class="form-label"><strong>{{ group.label }}:</strong></label>
+            <select name="{{ group.key }}" id="{{ group.key }}" class="form-select part-select" required>
+                <option value="">--- {{ group.label }} Seçin ---</option>
+                
+                {# Bu döngü artık sadece ilgili gruba ait parçaları içeriyor #}
+                {% for part in group.parts %}
+                <option value="{{ part.id }}" class="part-option" data-aircraft-model="{{ part.aircraft_model }}" style="display: none;">
+                    {{ part.serial_number }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary mt-3">Uçağı Monte Et</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modelSelector = document.getElementById('model_name');
+    if (!modelSelector) return;
+
+    modelSelector.addEventListener('change', function() {
+        const selectedModel = this.value;
+        const partSelectors = document.querySelectorAll('.part-select');
+        
+        partSelectors.forEach(selector => {
+            // Her model değişiminde seçimi sıfırla
+            selector.value = "";
+            
+            const options = selector.querySelectorAll('.part-option');
+            options.forEach(option => {
+                // Sadece seçilen modele ait parçaları göster, diğerlerini gizle
+                if (option.dataset.aircraftModel === selectedModel) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

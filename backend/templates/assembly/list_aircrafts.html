@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Monte Edilmiş Uçaklar{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Monte Edilmiş Uçaklar</h2>
+        <a href="{% url 'create_assembly' %}" class="btn btn-primary">Yeni Montaj Yap</a>
+    </div>
+    <hr>
+    <table class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Seri Numarası</th>
+                <th>Model</th>
+                <th>Monte Eden</th>
+                <th>Montaj Tarihi</th>
+                <th>Kullanılan Parçalar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aircraft in aircrafts %}
+            <tr>
+                <td>{{ aircraft.serial_number }}</td>
+                <td>{{ aircraft.get_model_name_display }}</td>
+                <td>{{ aircraft.assembled_by.username }}</td>
+                <td>{{ aircraft.assembly_date|date:"d M Y, H:i" }}</td>
+                <td>
+                    <ul class="list-unstyled mb-0">
+                        {% for part in aircraft.parts.all %}
+                            <li>{{ part.serial_number }} ({{ part.get_type_display }})</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">Henüz monte edilmiş bir uçak bulunmamaktadır.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

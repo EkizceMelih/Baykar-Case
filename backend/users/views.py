@@ -13,6 +13,7 @@ from .serializers import RegisterSerializer, LoginSerializer
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
+
 class RegisterAPI(generics.CreateAPIView):
     """
     POST /api/auth/register/

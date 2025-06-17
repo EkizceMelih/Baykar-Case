@@ -1,56 +1,99 @@
+# assembly/serializers.py
+
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from inventory.models import Part
-from .models import Aircraft, AircraftPart
+from .models import Aircraft
 
 class AircraftSerializer(serializers.ModelSerializer):
-    # Gelen parça ID’leri, yalnızca AVAILABLE ve doğru uçak tipindeki parçalar olmalı
+    """
+    API üzerinden bir hava aracı oluşturmak için kullanılan serializer.
+    Gerekli tüm parçaların ID'lerini alarak montajı gerçekleştirir.
+    """
+    
+    # Yazma işlemi için (örn: POST isteği) parçaların ID'lerini alırız.
+    # Bu alan sadece "write-only" olacak, yani uçağı getirirken gösterilmeyecek.
     parts = serializers.PrimaryKeyRelatedField(
-        queryset=Part.objects.filter(status='AVAILABLE'),
-        many=True
+        queryset=Part.objects.filter(status=Part.Status.AVAILABLE),
+        many=True,
+        write_only=True, # <-- ÖNEMLİ: Sadece veri gönderirken kullanılır
+        label="Parça ID Listesi"
     )
+
+    # Okuma işlemi için (örn: GET isteği) iç içe geçmiş PartSerializer'ı kullanırız.
+    # Bu, uçağın detaylarını görüntülerken parçalarının da tüm bilgilerini görmemizi sağlar.
+    parts_details = serializers.SerializerMethodField(read_only=True, label="Monte Edilmiş Parçalar")
 
     class Meta:
         model = Aircraft
-        fields = ['id', 'type', 'parts', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        # DEĞİŞTİ: Alanları modelimizle uyumlu hale getirdik. 'type' yerine 'model_name'.
+        fields = ['id', 'model_name', 'parts', 'parts_details', 'assembled_by', 'assembly_date']
+        read_only_fields = ['id', 'assembly_date', 'assembled_by', 'parts_details']
+
+    def get_parts_details(self, obj):
+        """
+        Bir Aircraft nesnesine bağlı olan parçaların detaylarını getiren metod.
+        Modeldeki related_name='parts' sayesinde `obj.parts.all()` çalışır.
+        """
+        from inventory.serializers import PartSerializer # Döngüsel importu önlemek için burada import ediyoruz
+        return PartSerializer(obj.parts.all(), many=True).data
 
     def validate(self, data):
+        """
+        Montaj işlemi için gönderilen verilerin iş kurallarına uygunluğunu kontrol eder.
+        """
         user = self.context['request'].user
-        # 1) Sadece Montaj Takımı uçak üretebilir
-        if user.team.name != 'Montaj Takımı':
-            raise PermissionDenied("Sadece Montaj Takımı uçak üretebilir.")
+        
+        # 1) Sadece Montaj Takımı uçak üretebilir.
+        # Not: User modelinizde 'team' ilişkisi ve Team modelinde 'name' alanı olmalı.
+        if not hasattr(user, 'team') or user.team.name != 'MONTAJ':
+            raise PermissionDenied("Sadece MONTAJ takımı uçak üretebilir.")
 
-        parts = data['parts']
-        plane_type = data['type']
+        parts = data.get('parts', [])
+        plane_model_name = data.get('model_name')
 
-        # 2) Tüm parçalar plane_type’a ait mi?
-        for p in parts:
-            if p.aircraft_type != plane_type:
-                raise ValidationError(f"Parça #{p.id} ({p.get_type_display()}) {plane_type} uçağına uygun değil.")
+        if not parts:
+            raise ValidationError("Montaj için en az bir parça gönderilmelidir.")
 
-        # 3) Gereken tüm parça tipleri gelmiş mi?
-        required = {t[0] for t in Part.PartType.choices}
-        provided = {p.type for p in parts}
-        missing = required - provided
-        if missing:
-            missing_names = ", ".join(Part.PartType.labels_by_value()[m] for m in missing)
-            raise ValidationError(f"Eksik parça tipleri: {missing_names}.")
+        # 2) Tüm parçalar, oluşturulacak uçağın modeline uygun mu?
+        for part in parts:
+            if part.aircraft_model != plane_model_name:
+                raise ValidationError(
+                    f"Parça #{part.id} ({part.get_type_display()}) {plane_model_name} uçağına uygun değil."
+                )
+
+        # 3) Uçak montajı için gereken tüm parça tipleri (KANAT, GOVDE vb.) gönderilmiş mi?
+        required_part_types = {choice[0] for choice in Part.PartType.choices}
+        provided_part_types = {part.type for part in parts}
+        
+        if len(required_part_types) != len(provided_part_types):
+             missing = required_part_types - provided_part_types
+             if missing:
+                 # `Part.PartType.labels` Django'nun standart özelliğidir.
+                 missing_names = ", ".join([Part.PartType(m).label for m in missing])
+                 raise ValidationError(f"Eksik parça tipleri: {missing_names}.")
 
         return data
 
     def create(self, validated_data):
-        parts = validated_data.pop('parts')
-        user_team = self.context['request'].user.team
+        """
+        Validasyondan geçen verilerle uçağı oluşturur ve parçaları ilişkilendirir.
+        """
+        # 'parts' listesini asıl veri kümesinden ayırıyoruz, çünkü bu Aircraft modelinin doğrudan bir alanı değil.
+        parts_to_assemble = validated_data.pop('parts')
+        user = self.context['request'].user
 
-        # 4) Uçağı oluştur ve parçaları ilişkilendir
+        # 4) Uçağı oluştur
+        # validated_data içinde sadece 'model_name' kaldı.
         aircraft = Aircraft.objects.create(
-            type=validated_data['type'],
-            created_by=user_team
+            assembled_by=user,
+            **validated_data
         )
-        for p in parts:
-            AircraftPart.objects.create(aircraft=aircraft, part=p)
-            p.status = Part.PartStatus.ALLOCATED  # veya 'ALLOCATED'
-            p.save()
+
+        # 5) Parçaları uçağa bağla ve durumlarını güncelle (Artık AircraftPart yok!)
+        for part in parts_to_assemble:
+            part.used_in_aircraft = aircraft  # <-- İLİŞKİ BURADA KURULUYOR!
+            part.status = Part.Status.USED  # <-- Parçanın durumu 'Kullanıldı' olarak değişiyor.
+            part.save(update_fields=['used_in_aircraft', 'status'])
 
         return aircraft

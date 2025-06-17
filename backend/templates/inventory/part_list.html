@@ -1,45 +1,33 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<h2 class="mb-4">Parça Listesi</h2>
-
-<div class="card">
-  <div class="card-body">
-    <table id="partsTable" class="table table-striped table-bordered w-100">
-      <thead>
+<h2>Parçalarım</h2>
+<a href="{% url 'add-part' %}" class="btn btn-primary">Yeni Parça Ekle</a>
+<table class="table mt-3">
+    <thead>
         <tr>
-          <th>ID</th>
-          <th>Tip</th>
-          <th>Uçak Türü</th>
-          <th>Durum</th>
-          <th>Oluşturan Takım</th>
-          <th>Oluşturma Tarihi</th>
+            <th>Tür</th>
+            <th>Uçak Tipi</th>
+            <th>Durum</th>
+            <th>Oluşturan</th>
+            <th>İşlem</th>
         </tr>
-      </thead>
-    </table>
-  </div>
-</div>
-
-<script>
-  $(document).ready(function() {
-    $('#partsTable').DataTable({
-      processing: true,
-      serverSide: true,
-      ajax: {
-        url: '/api/parts/',
-        headers: { 'Authorization': 'Token ' + localStorage.getItem('authToken') },
-        dataSrc: 'results'
-      },
-      columns: [
-        { data: 'id' },
-        { data: 'type' },
-        { data: 'aircraft_type' },
-        { data: 'status' },
-        { data: 'team' },
-        { data: 'created_at' }
-      ],
-      lengthMenu: [10, 25, 50],
-      order: [[0, 'desc']]
-    });
-  });
-</script>
+    </thead>
+    <tbody>
+        {% for part in parts %}
+        <tr>
+            <td>{{ part.get_type_display }}</td>
+            <td>{{ part.aircraft_type }}</td>
+            <td>{{ part.get_status_display }}</td>
+            <td>{{ part.created_by.username }}</td>
+            <td>
+                {% if part.status == "AVAILABLE" %}
+                <a href="{% url 'recycle-part' part.id %}" class="btn btn-danger btn-sm">Geri Dönüşüme Gönder</a>
+                {% else %}
+                <span class="text-muted">--</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
