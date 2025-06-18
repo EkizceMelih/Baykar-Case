@@ -46,7 +46,7 @@
 </p>
 
 <p align="center">
-  <img src="montaj_part_eksikler_oldugunda.png" alt="Veri Akışı" width="600"/>
+  <img src="montaj_part_eksikler_olduğunda.png" alt="Veri Akışı" width="600"/>
   <br>
   <em> Montaj Eksiklikleri Ekranı</em>
 </p>
