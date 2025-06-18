@@ -12,9 +12,7 @@ from rest_framework import permissions
 from assembly.views import AircraftViewSet
 from inventory.views import PartViewSet
 
-# --- Auth API'leri Artık Gerekmiyor ---
-# Bu import'lar users/api_urls.py dosyasına taşındı.
-# from users.views import RegisterAPI, LoginAPI, CustomAuthToken, ProfileAPI
+
 
 # --- Swagger Schema ---
 schema_view = get_schema_view(
@@ -33,7 +31,7 @@ router.register(r"parts", PartViewSet, basename="part")
 router.register(r"aircrafts", AircraftViewSet, basename="aircraft")
 
 urlpatterns = [
-    # YÖNETİM & API URL'leri
+    # YÖNETİM & API URL'leriM
     path("admin/", admin.site.urls),
     path("api/", include(router.urls)),
     path("api/auth/", include('users.api_urls')), # <-- API Auth URL'leri artık buradan yönetiliyor.
@@ -41,7 +39,7 @@ urlpatterns = [
     path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 
-    # WEB SAYFASI URL'leri
+    # WEB SAYFASI URL'lerim
     path("accounts/", include("users.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("inventory/", include('inventory.urls')),

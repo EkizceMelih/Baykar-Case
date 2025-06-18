@@ -1,62 +1,127 @@
-<!doctype html>
-<html lang="tr">
+<!DOCTYPE html>
+<html lang="tr" class="h-full bg-gray-100">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Uçak Üretim Sistemi{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BAYKAR Üretim Sistemi{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome (İkonlar için) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* DataTables Stil İyileştirmeleri (Açık Tema için) */
+        .dataTables_wrapper .dataTables_length select,
+        .dataTables_wrapper .dataTables_filter input {
+            border-radius: 0.375rem; /* rounded-md */
+            border-width: 1px;
+            border-color: #d1d5db; /* gray-300 */
+            padding: 0.5rem 0.75rem;
+            margin-left: 0.5rem;
+            background-color: #ffffff;
+            color: #111827; /* gray-900 */
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #4f46e5 !important; /* indigo-600 */
+            border-color: #4f46e5 !important;
+            color: white !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #e5e7eb !important; /* gray-200 */
+            border-color: #d1d5db !important; /* gray-300 */
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">AirProd</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                {% if user.is_authenticated %}
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'part-list' %}">Parça Envanteri</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'add-part' %}">Yeni Parça Ekle</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'create_assembly' %}">Yeni Montaj Yap</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'list_aircrafts' %}">Monte Edilmiş Uçaklar</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            {{ user.username }} ({{ user.team.name }})
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'profile' %}">Profil</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form action="{% url 'logout' %}" method="post" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item">Çıkış Yap</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-                {% endif %}
+<body class="h-full">
+    <div class="min-h-full">
+        <!-- Ana Navigasyon (Koyu Tema) -->
+        <nav class="bg-gray-800">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <a href="{% url 'profile' %}" class="flex items-center space-x-2 text-white font-bold text-lg">
+                                <i class="fa-solid fa-plane-up text-indigo-400"></i>
+                                <span>BAYKAR</span>
+                            </a>
+                        </div>
+                        <div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-1">
+                                {% if user.is_authenticated %}
+                                    <a href="{% url 'part-list' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Envanter</a>
+                                    {% if user.team.type != 'MONTAJ' %}
+                                    <a href="{% url 'add-part' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Yeni Parça Ekle</a>
+                                    {% endif %}
+                                    <a href="{% url 'create_assembly' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Yeni Montaj Yap</a>
+                                    <a href="{% url 'list_aircrafts' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Monte Edilmiş Uçaklar</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if user.is_authenticated %}
+                    <div class="hidden md:block">
+                        <div class="ml-4 flex items-center md:ml-6">
+                            <!-- Profil Dropdown -->
+                            <div class="relative ml-3">
+                                <button type="button" class="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800" id="user-menu-button">
+                                    <span class="text-gray-300 mr-3">{{ user.username }} <span class="text-gray-400">({{ user.team.name }})</span></span>
+                                    <i class="fa-solid fa-user-circle text-2xl text-gray-400"></i>
+                                </button>
+                                <div id="user-menu" class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu">
+                                    <a href="{% url 'profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Profil</a>
+                                    <form action="{% url 'logout' %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Çıkış Yap</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="container mt-4">
-        {% block content %}
-        {% endblock %}
-    </main>
+        <!-- Sayfa Başlığı Alanı (Açık Tema) -->
+        <header class="bg-white shadow-sm">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900">{% block page_title %}{% endblock %}</h1>
+            </div>
+        </header>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Ana İçerik Alanı -->
+        <main>
+            <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.tailwindcss.min.js"></script>
+    
+    <script>
+        // Profil menüsü için toggle scripti
+        $(document).ready(function() {
+            const menuButton = $('#user-menu-button');
+            const userMenu = $('#user-menu');
+            menuButton.on('click', function(e) {
+                e.stopPropagation();
+                userMenu.toggleClass('hidden');
+            });
+            $(document).on('click', function(event) {
+                if (!$(event.target).closest('#user-menu-button').length && !$(event.target).closest('#user-menu').length) {
+                    userMenu.addClass('hidden');
+                }
+            });
+        });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

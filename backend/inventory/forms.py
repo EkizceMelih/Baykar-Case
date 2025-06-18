@@ -4,7 +4,7 @@ from .models import Part
 class PartForm(forms.ModelForm):
     class Meta:
         model = Part
-        # 'aircraft_model' alanının burada olduğundan emin olun!
+       
         fields = ['type', 'aircraft_model']
         widgets = {
             'type': forms.Select(attrs={'class': 'form-control', 'readonly': True}),

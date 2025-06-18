@@ -2,14 +2,14 @@ import os
 from pathlib import Path
 import environ
 
-# ---------- ENVIRONMENT SETUP ----------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, False)
 )
-# .env dosyasını proje kökünden oku
+
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-# ---------------------------------------
+
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG      = env('DEBUG')
@@ -25,12 +25,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Üçüncü parti
+    # third party eklediklerim
     'rest_framework',
     'rest_framework.authtoken',
     'drf_yasg',
     'django_filters',
-    'widget_tweaks',          # ← add_class ve attr filtreleri için
+    'widget_tweaks',          
+    'django_datatables_view',  
+
 
     # Yerel uygulamalar
     'users',
@@ -69,11 +71,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'aircraft_production.wsgi.application'
 
-# ------------ DATABASE ----------------
+#DATABASE KISMI
 DATABASES = {
     'default': env.db_url('DATABASE_URL')
 }
-# --------------------------------------
+
 
 AUTH_USER_MODEL = 'users.User'
 

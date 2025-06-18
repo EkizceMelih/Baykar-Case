@@ -1,33 +1,57 @@
 {% extends 'base.html' %}
+
+{% block title %}Parça Envanterim{% endblock %}
+
 {% block content %}
-<h2>Parçalarım</h2>
-<a href="{% url 'add-part' %}" class="btn btn-primary">Yeni Parça Ekle</a>
-<table class="table mt-3">
-    <thead>
-        <tr>
-            <th>Tür</th>
-            <th>Uçak Tipi</th>
-            <th>Durum</th>
-            <th>Oluşturan</th>
-            <th>İşlem</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for part in parts %}
-        <tr>
-            <td>{{ part.get_type_display }}</td>
-            <td>{{ part.aircraft_type }}</td>
-            <td>{{ part.get_status_display }}</td>
-            <td>{{ part.created_by.username }}</td>
-            <td>
-                {% if part.status == "AVAILABLE" %}
-                <a href="{% url 'recycle-part' part.id %}" class="btn btn-danger btn-sm">Geri Dönüşüme Gönder</a>
-                {% else %}
-                <span class="text-muted">--</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Parça Envanterim ({{ user.team.name }})</h2>
+        <a href="{% url 'add-part' %}" class="btn btn-primary">Yeni Parça Ekle</a>
+    </div>
+    <p>Bu tabloda takımınıza ait, stokta bulunan tüm parçaları görebilirsiniz.</p>
+    <hr>
+    
+    <table id="parts_table" class="table table-bordered table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>Seri Numarası</th>
+                <th>Parça Tipi</th>
+                <th>Uyumlu Uçak</th>
+                <th>Durum</th>
+                <th>Oluşturan</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Veriler JavaScript ile asenkron olarak buraya yüklenecek -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    $('#parts_table').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": {
+            "url": "{% url 'api_parts_datatable' %}",
+            "type": "GET"
+        },
+        "columns": [
+            { "data": "serial_number" },
+            { "data": "type" },
+            { "data": "aircraft_model" },
+            { "data": "status" },
+            { "data": "created_by__username" },
+            // İşlem kolonu sunucudan gelmez, JS ile oluşturulur ve sıralanamaz/aranamaz
+            { "data": "actions", "orderable": false, "searchable": false }
+        ],
+        "language": {
+            "url": "https://cdn.datatables.net/plug-ins/2.0.8/i18n/tr.json"
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -2,10 +2,10 @@
 
 from django.db import models
 from django.conf import settings
-from django.utils import timezone # <-- Yıl bilgisi için eklendi
+from django.utils import timezone 
 
 class Part(models.Model):
-    # ... (PartType, AircraftModel, Status sınıfları aynı kalacak) ...
+   
     class PartType(models.TextChoices):
         KANAT = "KANAT", "Kanat"
         GOVDE = "GOVDE", "Gövde"
@@ -26,7 +26,7 @@ class Part(models.Model):
     type = models.CharField(max_length=10, choices=PartType.choices, verbose_name="Parça Tipi")
     aircraft_model = models.CharField(max_length=10, choices=AircraftModel.choices, verbose_name="Uyumlu Hava Aracı Modeli")
     
-    # --- DEĞİŞTİ: Artık kullanıcı tarafından düzenlenemez ve boş olabilir ---
+
     serial_number = models.CharField(
         max_length=100, 
         unique=True, 

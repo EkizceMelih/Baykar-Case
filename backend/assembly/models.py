@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.utils import timezone # Yıl bilgisini almak için eklendi
+from django.utils import timezone # tarih için yıl bilgisi lazımdı
 
 class Aircraft(models.Model):
     """
@@ -15,12 +15,12 @@ class Aircraft(models.Model):
 
     model_name = models.CharField(max_length=10, choices=AircraftModel.choices, verbose_name="Hava Aracı Modeli")
     
-    # DEĞİŞTİRİLDİ: Bu alanın sistem tarafından doldurulacağını belirtiyoruz.
+
     serial_number = models.CharField(
         max_length=100,
         unique=True,
-        blank=True,      # Geçici olarak boş olabilir (kaydetme anında dolacak)
-        editable=False,  # Kullanıcı tarafından düzenlenemez
+        blank=True,     
+        editable=False, 
         verbose_name="Seri Numarası"
     )
     
@@ -30,7 +30,7 @@ class Aircraft(models.Model):
     def __str__(self):
         return self.serial_number or f"{self.get_model_name_display()} (Kaydedilmedi)"
     
-    # YENİ: Otomatik seri numarası oluşturmak için save metodu
+   
     def save(self, *args, **kwargs):
         # Sadece yeni bir nesne oluşturulurken (yani pk yoksa) seri numarası ata
         if not self.pk:
@@ -41,7 +41,7 @@ class Aircraft(models.Model):
             last_aircraft_count = Aircraft.objects.filter(serial_number__startswith=prefix).count()
             next_id = last_aircraft_count + 1
             
-            # Seri numarasını formatla (örn: TB2-2025-0001)
+            # Seri numarasını formatla (örn: TB2-2025-0001) bu formatı kullanıyorum çok daha uygun olduğunu düşündüm.
             self.serial_number = f"{prefix}-{str(next_id).zfill(4)}"
         
         # Orijinal save metodunu çağırarak nesneyi kaydet

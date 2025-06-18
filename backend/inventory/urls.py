@@ -1,13 +1,12 @@
-# backend/inventory/urls.py
-
 from django.urls import path
-from .views import part_list, add_part, recycle_part
-
-# Bu dosya, inventory uygulamasına ait web sayfası (template-tabanlı) URL'lerini yönetir.
-# API URL'leri projenin ana urls.py dosyasındaki router tarafından yönetilmektedir.
+from . import views
 
 urlpatterns = [
-    path('parts/', part_list, name='part-list'),
-    path('parts/add/', add_part, name='add-part'),
-    path('parts/<int:part_id>/recycle/', recycle_part, name='recycle-part'),
+    # Mevcut URL'ler
+    path('parts/', views.part_list, name='part-list'),
+    path('parts/add/', views.add_part, name='add-part'),
+    path('parts/<int:part_id>/recycle/', views.recycle_part, name='recycle-part'),
+
+    # YENİ: DataTables API endpoint'i
+    path('api/parts-datatable/', views.PartListJson.as_view(), name='api_parts_datatable'),
 ]

@@ -1,19 +1,77 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Yeni Parça Ekle{% endblock %}
+{% block page_title %}Yeni Parça Ekle{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Yeni Parça Ekle</h2>
-    <hr>
-    
-    <form method="post">
-        {% csrf_token %}
-        
-        {{ form.as_p }}
-        
-        <button type="submit" class="btn btn-primary mt-3">Kaydet</button>
-        <a href="{% url 'part-list' %}" class="btn btn-secondary mt-3">İptal</a>
-    </form>
+<div class="space-y-10 divide-y divide-gray-200">
+    <div class="grid grid-cols-1 gap-x-8 gap-y-8 md:grid-cols-3">
+        <div class="px-4 sm:px-0">
+            <h2 class="text-base font-semibold leading-7 text-gray-900">Parça Bilgileri</h2>
+            <p class="mt-1 text-sm leading-6 text-gray-600">
+                Bu form, takımınızın sorumluluğunda olan yeni bir parçayı envantere eklemek için kullanılır.
+                Parça tipi otomatik olarak takımınıza göre ayarlanmıştır.
+            </p>
+        </div>
+
+        <div class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+            <form method="post">
+                {% csrf_token %}
+                <div class="px-4 py-6 sm:p-8">
+                    {% if form.errors %}
+                        <div class="rounded-md bg-red-50 p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fa-solid fa-circle-xmark text-red-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">Lütfen aşağıdaki hataları düzeltin:</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <ul role="list" class="list-disc space-y-1 pl-5">
+                                            {% for field, errors in form.errors.items %}
+                                                {% for error in errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                        
+                        <!-- Parça Tipi (Sadece Okunur) -->
+                        <div class="sm:col-span-3">
+                            <label for="{{ form.type.id_for_label }}" class="block text-sm font-semibold leading-6 text-gray-900">Parça Tipi</label>
+                            <div class="mt-2">
+                                <p class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-500 bg-gray-50 shadow-sm ring-1 ring-inset ring-gray-200">
+                                    {{ form.type.value|default_if_none:user.team.get_type_display }}
+                                </p>
+                                <div class="hidden">
+                                    {{ form.type }}
+                                </div>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">Bu alan takımınıza göre otomatik olarak ayarlanmıştır.</p>
+                        </div>
+                        
+                        <!-- Uyumlu Uçak Modeli -->
+                        <div class="sm:col-span-3">
+                            <label for="{{ form.aircraft_model.id_for_label }}" class="block text-sm font-semibold leading-6 text-gray-900">Uyumlu Hava Aracı Modeli</label>
+                            <div class="mt-2">
+                                {{ form.aircraft_model }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8">
+                    <a href="{% url 'part-list' %}" class="text-sm font-semibold leading-6 text-gray-900">İptal</a>
+                    <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                        <i class="fa-solid fa-save mr-2"></i>Parçayı Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

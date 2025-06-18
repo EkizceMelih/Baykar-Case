@@ -11,22 +11,21 @@ class AircraftSerializer(serializers.ModelSerializer):
     Gerekli tüm parçaların ID'lerini alarak montajı gerçekleştirir.
     """
     
-    # Yazma işlemi için (örn: POST isteği) parçaların ID'lerini alırız.
-    # Bu alan sadece "write-only" olacak, yani uçağı getirirken gösterilmeyecek.
+  
     parts = serializers.PrimaryKeyRelatedField(
         queryset=Part.objects.filter(status=Part.Status.AVAILABLE),
         many=True,
-        write_only=True, # <-- ÖNEMLİ: Sadece veri gönderirken kullanılır
+        write_only=True,
         label="Parça ID Listesi"
     )
 
-    # Okuma işlemi için (örn: GET isteği) iç içe geçmiş PartSerializer'ı kullanırız.
+
     # Bu, uçağın detaylarını görüntülerken parçalarının da tüm bilgilerini görmemizi sağlar.
     parts_details = serializers.SerializerMethodField(read_only=True, label="Monte Edilmiş Parçalar")
 
     class Meta:
         model = Aircraft
-        # DEĞİŞTİ: Alanları modelimizle uyumlu hale getirdik. 'type' yerine 'model_name'.
+     
         fields = ['id', 'model_name', 'parts', 'parts_details', 'assembled_by', 'assembly_date']
         read_only_fields = ['id', 'assembly_date', 'assembled_by', 'parts_details']
 
@@ -44,8 +43,8 @@ class AircraftSerializer(serializers.ModelSerializer):
         """
         user = self.context['request'].user
         
-        # 1) Sadece Montaj Takımı uçak üretebilir.
-        # Not: User modelinizde 'team' ilişkisi ve Team modelinde 'name' alanı olmalı.
+        # Sadece Montaj Takımı uçak üretebilir bu yüzden burası gerekli
+       
         if not hasattr(user, 'team') or user.team.name != 'MONTAJ':
             raise PermissionDenied("Sadece MONTAJ takımı uçak üretebilir.")
 
@@ -55,14 +54,14 @@ class AircraftSerializer(serializers.ModelSerializer):
         if not parts:
             raise ValidationError("Montaj için en az bir parça gönderilmelidir.")
 
-        # 2) Tüm parçalar, oluşturulacak uçağın modeline uygun mu?
+        # Tüm parçalar, oluşturulacak uçağın modeline uygun mu. TB3, TB2 parçaları ayrı örneğin
         for part in parts:
             if part.aircraft_model != plane_model_name:
                 raise ValidationError(
                     f"Parça #{part.id} ({part.get_type_display()}) {plane_model_name} uçağına uygun değil."
                 )
 
-        # 3) Uçak montajı için gereken tüm parça tipleri (KANAT, GOVDE vb.) gönderilmiş mi?
+        #  Uçak montajı için gereken tüm parça tipleri
         required_part_types = {choice[0] for choice in Part.PartType.choices}
         provided_part_types = {part.type for part in parts}
         
@@ -83,17 +82,17 @@ class AircraftSerializer(serializers.ModelSerializer):
         parts_to_assemble = validated_data.pop('parts')
         user = self.context['request'].user
 
-        # 4) Uçağı oluştur
-        # validated_data içinde sadece 'model_name' kaldı.
+        # 4) Uçak oluşturma alanı
+      
         aircraft = Aircraft.objects.create(
             assembled_by=user,
             **validated_data
         )
 
-        # 5) Parçaları uçağa bağla ve durumlarını güncelle (Artık AircraftPart yok!)
+        # 5) Parçaları uçağa bağla ve durumlarını güncelle 
         for part in parts_to_assemble:
-            part.used_in_aircraft = aircraft  # <-- İLİŞKİ BURADA KURULUYOR!
-            part.status = Part.Status.USED  # <-- Parçanın durumu 'Kullanıldı' olarak değişiyor.
+            part.used_in_aircraft = aircraft  # relation kuruyorum
+            part.status = Part.Status.USED  # <-- parça kullanıldı olarak değişiyor ve stoktan düşüyor müsait olanlardan
             part.save(update_fields=['used_in_aircraft', 'status'])
 
         return aircraft

@@ -5,5 +5,5 @@ django-environ
 drf-yasg
 django-filter
 django-widget-tweaks
+django-datatables-view
 
-# ve varsa diğer paketleriniz…

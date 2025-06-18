@@ -1,36 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}Profilim{% endblock %}
+{% block page_title %}Profilim{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Hoş geldin, {{ user.get_full_name|default:user.username }}!</h2>
-    
-    {% if user.team %}
-        <p class="lead">Takımın: <strong>{{ user.team.name }}</strong></p>
-    {% else %}
-        <p class="text-muted">Henüz bir takıma atanmamışsın.</p>
-    {% endif %}
-    
-    <hr>
-    
-    <h4>Hızlı Erişim</h4>
-
-    {% if user.team %}
-        {# Montaj Takımı için özel menü #}
-        {% if user.team.type == 'MONTAJ' %}
-            <p>Montaj işlemleri için aşağıdaki linkleri kullanabilirsiniz:</p>
-            <a href="{% url 'part-list' %}" class="btn btn-info">Genel Envanter Durumu</a>
-            <a href="{% url 'create_assembly' %}" class="btn btn-primary">Yeni Montaj Yap</a>
-            <a href="{% url 'list_aircrafts' %}" class="btn btn-secondary">Monte Edilmiş Uçaklar</a>
-    
-        {# Diğer üretim takımları için menü #}
-        {% else %}
-            <p>Parça yönetimi için aşağıdaki linkleri kullanabilirsiniz:</p>
-            <a href="{% url 'part-list' %}" class="btn btn-primary">Parça Envanterim</a>
-            <a href="{% url 'add-part' %}" class="btn btn-success">Yeni Parça Ekle</a>
+<div class="bg-white shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+    <div class="px-4 py-6 sm:p-8">
+        <h2 class="text-2xl font-semibold leading-7 text-gray-900">Hoş geldin, {{ user.get_full_name|default:user.username }}!</h2>
+        {% if user.team %}
+            <p class="mt-1 text-sm leading-6 text-gray-600">
+                Takımın: <span class="font-semibold text-indigo-600">{{ user.team.name }}</span>
+            </p>
         {% endif %}
-    {% endif %}
-
+    </div>
+    <div class="border-t border-gray-900/5 px-4 py-6 sm:p-8">
+        <h3 class="text-base font-semibold leading-7 text-gray-900">Hızlı Erişim Menüsü</h3>
+        <div class="mt-4 flex flex-wrap gap-4">
+            {% if user.team %}
+                {% if user.team.type == 'MONTAJ' %}
+                    <a href="{% url 'part-list' %}" class="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"><i class="fa-solid fa-warehouse mr-2"></i>Genel Envanter Durumu</a>
+                    <a href="{% url 'create_assembly' %}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"><i class="fa-solid fa-cogs mr-2"></i>Yeni Montaj Yap</a>
+                    <a href="{% url 'list_aircrafts' %}" class="rounded-md bg-gray-800 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-700"><i class="fa-solid fa-plane mr-2"></i>Monte Edilmiş Uçaklar</a>
+                {% else %}
+                    <a href="{% url 'part-list' %}" class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"><i class="fa-solid fa-list mr-2"></i>Parça Envanterim</a>
+                    <a href="{% url 'add-part' %}" class="rounded-md bg-green-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-green-500"><i class="fa-solid fa-plus mr-2"></i>Yeni Parça Ekle</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
