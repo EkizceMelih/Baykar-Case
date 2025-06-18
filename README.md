@@ -6,12 +6,12 @@
 
 ## 🎥 Proje Tanıtım Videosu
 
-<a href="YOUTUBE_VIDEO_LINKINIZ">
-  <img src="(https://youtu.be/fp-AnVK3zPc)" alt="Proje Tanıtım Videosu" />
+<a href="YOUTUBE_VIDEO_LINKINIZ" target="_blank">
+  <img src="https://i.ytimg.com/vi/YOUTUBE_VIDEO_ID/hqdefault.jpg" alt="Proje Tanıtım Videosu" />
 </a>
 
 <p align="center">
-  <a href="YOUTUBE_VIDEO_LINKINIZ"><strong>Videoyu İzlemek İçin Tıklayın</strong></a>
+  <a href="(https://youtu.be/fp-AnVK3zPc)" target="_blank"><strong>Videoyu İzlemek İçin Tıklayın</strong></a>
 </p>
 
 <br>
