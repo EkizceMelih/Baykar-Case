@@ -16,8 +16,9 @@
 
 <p align="center">
   <img src="login_kismi.png" alt="Login" width="600"/>
-  <em>Veri Akışı - Login Ekranı.</em>
   <br>
+  <em> Login Ekranı.</em>
+  
 
 </p>
 
