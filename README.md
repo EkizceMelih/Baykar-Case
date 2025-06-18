@@ -15,19 +15,52 @@
 <h2 align="center">🖼️ Ekran Görüntüleri</h2>
 
 <p align="center">
-  <img src="assets/ekran-goruntusu-1.png" alt="Ana Sayfa" width="600"/>
+  <img src="login_kismi.png" alt="Login" width="600"/>
+  <em>Veri Akışı - Login Ekranı.</em>
   <br>
-  <em>Ana Sayfa - Kullanıcı giriş ekranı modern ve sade tasarıma sahiptir.</em>
+
 </p>
 
 <p align="center">
-  <img src="assets/ekran-goruntusu-2.png" alt="Veri Akışı" width="600"/>
+  <img src="register_kısmi.png" alt="Veri Akışı" width="600"/>
   <br>
-  <em>Veri Akışı - Gerçek zamanlı veri akışı burada gösterilmektedir.</em>
+  <em>Veri Akışı - Register Ekranı.</em>
+</p>
+<p align="center">
+  <img src="takim_profile_part.png" alt="Veri Akışı" width="600"/>
+  <br>
+  <em>Takım Profili Ekranı</em>
 </p>
 
 <p align="center">
-  <img src="assets/ekran-goruntusu-3.png" alt="Mobil Uyumluluk" width="600"/>
+  <img src="envanter_part.png" alt="Veri Akışı" width="600"/>
   <br>
-  <em>Mobil Uyumluluk - Uygulamanın responsive arayüzü tüm cihazlarda sorunsuz çalışır.</em>
+  <em>Envanter Ekranı</em>
+</p>
+
+<p align="center">
+  <img src="montaj_envanter_part.png" alt="Veri Akışı" width="600"/>
+  <br>
+  <em> Montaj Envanter Ekranı</em>
+</p>
+
+<p align="center">
+  <img src="montaj_part_eksikler_oldugunda.png" alt="Veri Akışı" width="600"/>
+  <br>
+  <em> Montaj Eksiklikleri Ekranı</em>
+</p>
+<p align="center">
+  <img src="montaj_takimi_part.png" alt="Veri Akışı" width="600"/>
+  <br>
+  <em> Montaj Takımı Ekranı</em>
+</p>
+<p align="center">
+  <img src="montajli_ucaklar.png" alt="Veri Akışı" width="600"/>
+  <br>
+  <em> Montajlı Uçaklar Ekranı</em>
+</p>
+<p align="center">
+  <img src="docker_side.png" alt="Veri Akışı" width="600"/>
+  <br>
+  <em> Montajlı Uçaklar Ekranı</em>
 </p>
