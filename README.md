@@ -62,5 +62,5 @@
 <p align="center">
   <img src="docker_side.png" alt="Veri Akışı" width="600"/>
   <br>
-  <em> Montajlı Uçaklar Ekranı</em>
+  <em> Docker Ekranı</em>
 </p>
